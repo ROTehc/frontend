@@ -1,6 +1,12 @@
 <template>
-  <c-box w="100%" mb="4" p="4" shadow="md">
+  <c-box w="100%" mb="4" p="4" shadow="sm">
     <div id="map"></div>
+    <c-box w="25%" pl="4">
+      <c-stat>
+        <c-stat-label>Connected</c-stat-label>
+        <c-stat-number>3</c-stat-number>
+      </c-stat>
+    </c-box>
   </c-box>
 </template>
 
@@ -14,6 +20,7 @@ export default {
   name: "Map",
   data: () => ({
     background: "#222",
+    pointColor: "Aqua",
     width: 640,
     height: 240,
     filter: [], //[2, 3, 5, 8, 9, 10],
@@ -66,7 +73,7 @@ export default {
       .append("path")
       .datum({ type: "FeatureCollection", features: data })
       .attr("d", path.pointRadius(1.5))
-      .attr("fill", "cyan");
+      .attr("fill", this.pointColor);
   },
   methods: {
     pointBuilder(lon, lat) {
