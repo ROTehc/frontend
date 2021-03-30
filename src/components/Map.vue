@@ -1,89 +1,138 @@
 <template>
   <c-box w="100%" mb="4" p="4" shadow="sm">
     <div id="map"></div>
-    <c-box w="25%" pl="4">
-      <c-stat>
-        <c-stat-label>Connected</c-stat-label>
-        <c-stat-number>3</c-stat-number>
-      </c-stat>
-    </c-box>
+    <c-stat pl="4">
+      <c-stat-label>Connected devices</c-stat-label>
+      <c-stat-number>{{
+        points.length > 0
+          ? `${points.length} connected`
+          : "No devices connected"
+      }}</c-stat-number>
+    </c-stat>
   </c-box>
 </template>
 
 <script>
 import { select } from "d3";
 import { geoAzimuthalEquidistant, geoPath } from "d3-geo";
+import { geoVoronoi } from "d3-geo-voronoi";
 import * as topojson from "topojson";
 import map from "../mapred.json";
 
 export default {
   name: "Map",
   data: () => ({
+    width: 512,
+    height: 180,
     background: "#222",
-    pointColor: "Aqua",
-    width: 640,
-    height: 240,
-    filter: [], //[2, 3, 5, 8, 9, 10],
+    pointColor: "Yellow",
+    // muniFilter: [], [2, 3, 5, 8, 9, 10],
   }),
+  watch: {
+    data: function () {
+      this.drawPoints();
+      this.drawVoronoi();
+    },
+  },
+  props: {
+    data: Array,
+  },
+  computed: {
+    points() {
+      return this.data.map(this.pointBuilder);
+    },
+  },
   mounted() {
-    console.log(map);
+    this.features = topojson.merge(map, map.objects.municipios.geometries);
 
-    const features = topojson.merge(
-      map,
-      map.objects.municipios.geometries.filter((m) => {
-        return !(this.filter.indexOf(m.properties.NUMERO) != -1);
-      })
-    );
+    this.mesh = topojson.mesh(map, map.objects.municipios, (a, b) => a !== b);
 
-    const data = [
-      this.pointBuilder(-4.4435, 36.7626),
-      this.pointBuilder(-4.4182, 36.7211),
-      this.pointBuilder(-4.4699, 36.7151),
-    ];
-
-    const svg = select("#map")
+    this.svg = select("#map")
       .append("svg")
-      .attr("preserveAspectRatio", "xMinYMin meet")
       .attr("viewBox", [0, 0, this.width, this.height])
+      .attr("preserveAspectRatio", "xMinYMin meet")
       .classed("svg-content", true);
 
-    const projection = geoAzimuthalEquidistant().fitSize(
+    this.clip = this.svg
+      .append("defs")
+      .append("clipPath")
+      .attr("id", "clip-mask");
+
+    this.projection = geoAzimuthalEquidistant().fitSize(
       [this.width, this.height],
-      features
+      this.features
     );
 
-    const path = geoPath().projection(projection);
+    this.path = geoPath().projection(this.projection);
 
-    svg
+    this.clip.append("path").datum(this.features).attr("d", this.path);
+
+    this.svg
       .append("path")
-      .datum(features)
+      .datum(this.features)
       .attr("fill", this.background)
-      .attr("d", path);
+      .attr("d", this.path);
 
-    svg
+    this.pointNode = this.svg.append("g");
+    this.voronoiNode = this.svg
+      .append("g")
+      .attr("fill", "none")
+      .attr("stroke", "white")
+      .attr("stroke-width", 0.2)
+      .attr("pointer-events", "all")
+      .attr("clip-path", "url(#clip-mask)");
+
+    /*
+    this.svg
       .append("path")
-      .datum(topojson.mesh(map, map.objects.municipios, (a, b) => a !== b))
+      .datum(this.mesh)
       .attr("fill", "none")
       .attr("stroke", "white")
       .attr("stroke-linejoin", "miter")
       .attr("stroke-width", "0.2")
-      .attr("d", path);
-
-    svg
-      .append("path")
-      .datum({ type: "FeatureCollection", features: data })
-      .attr("d", path.pointRadius(1.5))
-      .attr("fill", this.pointColor);
+      .attr("d", this.path);
+      */
   },
   methods: {
-    pointBuilder(lon, lat) {
+    pointBuilder({ id, name, gas, coordinates }) {
       return {
         type: "Feature",
+        properties: {
+          id,
+          name,
+          gas,
+        },
         geometry: {
           type: "Point",
-          coordinates: [lon, lat],
+          coordinates,
         },
       };
+    },
+    drawPoints() {
+      if (this.pointPath) this.pointPath.remove();
+      this.pointPath = this.pointNode.append("path");
+      this.pointPath
+        .datum({
+          type: "FeatureCollection",
+          features: this.points,
+        })
+        .attr("d", this.path.pointRadius(1))
+        .attr("fill", this.pointColor);
+    },
+    drawVoronoi() {
+      if (this.voronoiPath) this.voronoiPath.remove();
+      this.voronoiPath = this.voronoiNode.append("path");
+      this.voronoiNode
+        .selectAll("path")
+        .data(geoVoronoi().polygons(this.points).features)
+        .join("path")
+        .attr("d", this.path)
+        .append("title")
+        .text((d) => {
+          const p = d.properties.site.properties;
+          console.log(p);
+          return p.gas.co2;
+        });
     },
   },
 };
