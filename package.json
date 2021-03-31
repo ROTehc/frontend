@@ -11,7 +11,6 @@
     "@chakra-ui/vue": "^0.6.2",
     "core-js": "^3.6.5",
     "d3": "^6.6.2",
-    "d3-delaunay": "^5.3.0",
     "d3-geo": "^2.0.1",
     "d3-geo-voronoi": "^1.6.0",
     "emotion": "^10.0.27",

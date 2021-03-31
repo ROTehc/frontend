@@ -22,16 +22,17 @@ import map from "../mapred.json";
 export default {
   name: "Map",
   data: () => ({
-    width: 512,
-    height: 180,
+    width: 1920,
+    height: 600,
     background: "#222",
-    pointColor: "Yellow",
+    pointSize: 2,
+    pointColor: "Black",
     // muniFilter: [], [2, 3, 5, 8, 9, 10],
   }),
   watch: {
     data: function () {
-      this.drawPoints();
       this.drawVoronoi();
+      this.drawPoints();
     },
   },
   props: {
@@ -71,14 +72,15 @@ export default {
       .append("path")
       .datum(this.features)
       .attr("fill", this.background)
+      .attr("stroke", this.background)
+      .attr("stroke-width", 1)
       .attr("d", this.path);
 
-    this.pointNode = this.svg.append("g");
     this.voronoiNode = this.svg
       .append("g")
       .attr("fill", "none")
-      .attr("stroke", "white")
-      .attr("stroke-width", 0.2)
+      .attr("stroke", this.background)
+      .attr("stroke-width", 0.5)
       .attr("pointer-events", "all")
       .attr("clip-path", "url(#clip-mask)");
 
@@ -94,12 +96,10 @@ export default {
       */
   },
   methods: {
-    pointBuilder({ id, name, gas, coordinates }) {
+    pointBuilder({ gas, coordinates }) {
       return {
         type: "Feature",
         properties: {
-          id,
-          name,
           gas,
         },
         geometry: {
@@ -110,30 +110,38 @@ export default {
     },
     drawPoints() {
       if (this.pointPath) this.pointPath.remove();
-      this.pointPath = this.pointNode.append("path");
-      this.pointPath
+      this.pointPath = this.svg
+        .append("path")
         .datum({
           type: "FeatureCollection",
           features: this.points,
         })
-        .attr("d", this.path.pointRadius(1))
+        .attr("d", this.path.pointRadius(this.pointSize))
         .attr("fill", this.pointColor);
     },
     drawVoronoi() {
-      if (this.voronoiPath) this.voronoiPath.remove();
-      this.voronoiPath = this.voronoiNode.append("path");
-      this.voronoiNode
+      if (this.voronoiSubNode) this.voronoiSubNode.remove();
+      this.voronoiSubNode = this.voronoiNode
+        .append("g")
         .selectAll("path")
         .data(geoVoronoi().polygons(this.points).features)
-        .join("path")
+        .enter()
+        .append("path")
         .attr("d", this.path)
-        .append("title")
-        .text((d) => {
-          const p = d.properties.site.properties;
-          console.log(p);
-          return p.gas.co2;
+        .attr("class", "polygon")
+        .attr("fill", (p) => {
+          const g = p.properties.site.properties.gas.co2;
+          if (g < 1000) return "forestgreen";
+          else if (g < 2000) return "Gold";
+          else return "FireBrick";
         });
     },
   },
 };
 </script>
+
+<style scoped>
+.polygon {
+  stroke: #00f;
+}
+</style>

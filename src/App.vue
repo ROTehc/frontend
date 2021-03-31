@@ -4,34 +4,34 @@
       <Navbar />
       <c-flex justify="center" direction="column" align="center">
         <Map :data="data" />
-        <c-button-group>
-          <c-button
-            variant-color="green"
-            @click="
-              {
-                if (pendingData.length > 0) data.push(pendingData.pop());
-              }
-            "
-            >Add</c-button
-          >
-          <c-button
-            variant-color="red"
-            @click="
-              {
-                if (data.length > 0) pendingData.push(data.pop());
-              }
-            "
-            >Remove</c-button
-          >
-        </c-button-group>
         <c-box
           :width="[
             '100%', // base
             '50%', // 480px upwards
             '70%', // 768px upwards
-            '30%', // 992px upwards
+            '40%', // 992px upwards
           ]"
         >
+          <c-button-group>
+            <c-button
+              variant-color="green"
+              @click="
+                {
+                  if (pendingData.length > 0) data.push(pendingData.pop());
+                }
+              "
+              >Add</c-button
+            >
+            <c-button
+              variant-color="red"
+              @click="
+                {
+                  if (data.length > 0) pendingData.push(data.pop());
+                }
+              "
+              >Remove</c-button
+            >
+          </c-button-group>
           <c-stat-group>
             <Stat
               gas="CO2"
@@ -70,15 +70,9 @@ import Stat from "@/components/Stat";
 export default {
   name: "App",
   data: () => ({
-    id: null,
-    name: "",
-    lon: -4.415860176086426,
-    lat: 36.749613386425054,
     data: [],
     pendingData: [
       {
-        id: 0,
-        name: "House",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
@@ -88,8 +82,6 @@ export default {
         coordinates: [-4.45021390914917, 36.71963561245719],
       },
       {
-        id: 1,
-        name: "IDK",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
@@ -99,8 +91,6 @@ export default {
         coordinates: [-4.431438446044922, 36.73240113505636],
       },
       {
-        id: 2,
-        name: "ETSII",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
@@ -110,8 +100,6 @@ export default {
         coordinates: [-4.478076696395874, 36.715215125584294],
       },
       {
-        id: 3,
-        name: "Airport",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
@@ -121,8 +109,6 @@ export default {
         coordinates: [-4.490876197814941, 36.67908918792989],
       },
       {
-        id: 4,
-        name: "Something",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
@@ -132,8 +118,6 @@ export default {
         coordinates: [-4.486284255981445, 36.74129146113483],
       },
       {
-        id: 5,
-        name: "Jardin",
         gas: {
           co2: Math.random() * 2500 + 200,
           o3: Math.random() * 70 + 30,
