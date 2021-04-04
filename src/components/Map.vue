@@ -1,5 +1,11 @@
 <template>
 	<c-box w="100%" mb="4" p="4" shadow="sm">
+		<c-radio-group v-model="selectedGas" is-inline>
+			<c-radio value="co2">CO2</c-radio>
+			<c-radio value="no2">NO2</c-radio>
+			<c-radio value="o3">O3</c-radio>
+			<c-radio value="so2">SO2</c-radio>
+		</c-radio-group>
 		<div id="map"></div>
 		<c-stat pl="4">
 			<c-stat-label>Connected devices</c-stat-label>
@@ -26,21 +32,32 @@
 			height: 600,
 			background: '#222',
 			pointSize: 2,
-			pointColor: 'Black'
+			pointColor: 'Black',
+			selectedGas: 'co2'
 			// muniFilter: [], [2, 3, 5, 8, 9, 10],
 		}),
 		watch: {
-			data: function() {
+			bayWatch: function() {
 				this.drawVoronoi();
 				this.drawPoints();
 			}
 		},
 		props: {
-			data: Array
+			nodeData: Array,
+			thresholds: Object
 		},
 		computed: {
+			bayWatch() {
+				return this.nodeData, this.selectedGas, Date.now();
+			},
+			low() {
+				return this.thresholds[this.selectedGas][0];
+			},
+			high() {
+				return this.thresholds[this.selectedGas][1];
+			},
 			points() {
-				return this.data.map(this.pointBuilder);
+				return this.nodeData.map(this.pointBuilder);
 			}
 		},
 		mounted() {
@@ -140,9 +157,11 @@
 					.attr('stroke', this.background)
 					.attr('pointer-events', 'all')
 					.attr('fill', (p) => {
-						const g = p.properties.site.properties.gas.co2;
-						if (g < 1000) return 'forestgreen';
-						else if (g < 2000) return 'Gold';
+						const g =
+							p.properties.site.properties.gas[this.selectedGas];
+						console.log('Coloring');
+						if (g < this.low) return 'forestgreen';
+						else if (g < this.high) return 'Gold';
 						else return 'FireBrick';
 					});
 

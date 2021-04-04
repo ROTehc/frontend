@@ -3,7 +3,7 @@
 		<c-box d="flex" w="100vw" h="100vh" flex-dir="column">
 			<Navbar />
 			<c-flex justify="center" direction="column" align="center">
-				<Map :data="data" />
+				<Map :nodeData="nodeData" :thresholds="thresholds" />
 				<c-box
 					:width="[
 						'100%', // base
@@ -18,7 +18,7 @@
 							@click="
 								{
 									if (pendingData.length > 0)
-										data.push(pendingData.pop());
+										nodeData.push(pendingData.pop());
 								}
 							"
 							>Add</c-button
@@ -27,8 +27,8 @@
 							variant-color="red"
 							@click="
 								{
-									if (data.length > 0)
-										pendingData.push(data.pop());
+									if (nodeData.length > 0)
+										pendingData.push(nodeData.pop());
 								}
 							"
 							>Remove</c-button
@@ -78,7 +78,13 @@
 	export default {
 		name: 'App',
 		data: () => ({
-			data: []
+			nodeData: [],
+			thresholds: {
+				co2: [1000, 2000],
+				no2: [55, 61],
+				o3: [50, 100],
+				so2: [100, 200]
+			}
 		}),
 		mounted() {
 			this.pendingData = [
@@ -122,8 +128,8 @@
 			},
 			avgGas(gas) {
 				return Math.round(
-					this.data.reduce((p, c) => p + c.gas[gas], 0) /
-						this.data.length
+					this.nodeData.reduce((p, c) => p + c.gas[gas], 0) /
+						this.nodeData.length
 				);
 			}
 		},
