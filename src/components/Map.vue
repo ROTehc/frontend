@@ -42,7 +42,7 @@
 		},
 		props: {
 			nodeData: Array,
-			thresholds: Object
+			gases: Object
 		},
 		computed: {
 			N() {
@@ -51,11 +51,11 @@
 			bayWatch() {
 				return this.nodeData, this.selectedGas, Date.now();
 			},
-			low() {
-				return this.thresholds[this.selectedGas][0];
+			ok() {
+				return this.gases[this.selectedGas].ok;
 			},
-			high() {
-				return this.thresholds[this.selectedGas][1];
+			hi() {
+				return this.gases[this.selectedGas].hi;
 			},
 			points() {
 				return this.nodeData.map(this.pointBuilder);
@@ -141,7 +141,7 @@
 					})
 					.attr(
 						'd',
-						this.path.pointRadius((this.pointSize * 4) / this.N)
+						this.path.pointRadius((this.pointSize * 10) / this.N)
 					)
 					.attr('fill', this.pointColor)
 					.attr('clip-path', 'url(#clip-mask)');
@@ -159,9 +159,8 @@
 					.attr('fill', (p) => {
 						const g =
 							p.properties.site.properties.gas[this.selectedGas];
-						console.log('Coloring');
-						if (g < this.low) return 'forestgreen';
-						else if (g < this.high) return 'Gold';
+						if (g < this.ok) return 'forestgreen';
+						else if (g < this.hi) return 'Gold';
 						else return 'FireBrick';
 					});
 

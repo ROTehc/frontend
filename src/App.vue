@@ -3,7 +3,7 @@
 		<c-box d="flex" w="100vw" h="100vh" flex-dir="column">
 			<Navbar />
 			<c-flex justify="center" direction="column" align="center">
-				<Map :nodeData="nodeData" :thresholds="thresholds" />
+				<Map :nodeData="nodeData" :gases="thresholds" />
 				<c-box
 					:width="[
 						'100%', // base
@@ -14,32 +14,13 @@
 				>
 					<c-stat-group>
 						<Stat
-							gas="CO2"
-							unit="ppm"
-							:avg="avgGas('co2')"
-							:ok="1000"
-							:high="2000"
-						/>
-						<Stat
-							gas="O3"
-							unit="ppb"
-							:avg="avgGas('o3')"
-							:ok="55"
-							:high="61"
-						/>
-						<Stat
-							gas="NO2"
-							unit="ppb"
-							:avg="avgGas('no2')"
-							:ok="50"
-							:high="100"
-						/>
-						<Stat
-							gas="SO2"
-							unit="ppb"
-							:avg="avgGas('so2')"
-							:ok="100"
-							:high="200"
+							v-for="g in gases"
+							:key="g.name"
+							:gas="g.name.toUpperCase()"
+							:unit="g.unit"
+							:avg="avgGas(g.name)"
+							:ok="g.thresholds.ok"
+							:high="g.thresholds.hi"
 						/>
 					</c-stat-group>
 				</c-box>
@@ -54,34 +35,74 @@
 	import Stat from '@/components/Stat';
 	import axios from 'axios';
 
+	const CSE_IP = 'http://localhost';
+	const CSE_PORT = 3000;
+	const URL = `${CSE_IP}:${CSE_PORT}`;
+	// /cse-in?rcn=4;
+
 	export default {
 		name: 'App',
 		data: () => ({
 			nodeData: [],
-			thresholds: {
-				co2: [1000, 2000],
-				no2: [55, 61],
-				o3: [50, 100],
-				so2: [100, 200]
-			}
+			gases: [
+				{
+					name: 'co2',
+					unit: 'ppm',
+					thresholds: { ok: 1000, hi: 2000 }
+				},
+				{
+					name: 'no2',
+					unit: 'ppb',
+					thresholds: { ok: 55, hi: 61 }
+				},
+				{
+					name: 'o3',
+					unit: 'ppb',
+					thresholds: { ok: 50, hi: 100 }
+				},
+				{
+					name: 'so2',
+					unit: 'ppb',
+					thresholds: { ok: 100, hi: 200 }
+				}
+			]
 		}),
+		computed: {
+			thresholds() {
+				return this.gases.reduce((obj, g) => {
+					obj[g.name] = g.thresholds;
+					return obj;
+				}, {});
+			}
+		},
 		mounted() {
-			setInterval(
-				async function() {
-					let { data } = await axios.get(
-						'http://192.168.1.137:3000',
-						{
-							'Access-Control-Allow-Origin': '*'
-						}
-					);
-					data = Object.keys(data).map((k) => data[k]);
-					console.table(data);
-					this.nodeData = data;
-				}.bind(this),
-				2500
-			);
+			this.getAll();
+			setInterval(this.getAll.bind(this), 1000);
 		},
 		methods: {
+			async getAll() {
+				let { data } = await axios.get(URL, {
+					'X-M2M-Origin': 'CAdmin',
+					'X-M2M-RVI': 3,
+					'X-M2M-RI': 123456,
+					Accept: 'application/json'
+				});
+				this.nodeData = this.parse(data);
+			},
+			parse(res) {
+				const data = res['m2m:cb']['m2m:ae'];
+				return data
+					.slice(1, data.length + 1)
+					.map((node) => node['m2m:cnt'])
+					.map(([g, c]) => ({
+						coordinates: JSON.parse(
+							c['m2m:cin'][0]['con'].replaceAll("'", '"')
+						)['coord'],
+						gas: JSON.parse(
+							g['m2m:cin'][0]['con'].replaceAll("'", '"')
+						)
+					}));
+			},
 			avgGas(gas) {
 				return Math.round(
 					this.nodeData.reduce((p, c) => p + c.gas[gas], 0) /
