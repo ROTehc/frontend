@@ -9,6 +9,7 @@
 	},
 	"dependencies": {
 		"@chakra-ui/vue": "^0.6.2",
+		"axios": "^0.21.1",
 		"core-js": "^3.6.5",
 		"d3": "^6.6.2",
 		"d3-geo": "^2.0.1",
