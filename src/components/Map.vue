@@ -2,17 +2,15 @@
 	<c-box w="100%" mb="4" p="4" shadow="sm">
 		<c-radio-group v-model="selectedGas" is-inline>
 			<c-radio value="co2">CO2</c-radio>
-			<c-radio value="no2">NO2</c-radio>
 			<c-radio value="o3">O3</c-radio>
+			<c-radio value="no2">NO2</c-radio>
 			<c-radio value="so2">SO2</c-radio>
 		</c-radio-group>
 		<div id="map"></div>
 		<c-stat pl="4">
 			<c-stat-label>Connected devices</c-stat-label>
 			<c-stat-number>{{
-				points.length > 0
-					? `${points.length} connected`
-					: 'No devices connected'
+				N > 0 ? `${N} connected` : 'No devices connected'
 			}}</c-stat-number>
 		</c-stat>
 	</c-box>
@@ -47,6 +45,9 @@
 			thresholds: Object
 		},
 		computed: {
+			N() {
+				return this.nodeData.length;
+			},
 			bayWatch() {
 				return this.nodeData, this.selectedGas, Date.now();
 			},
@@ -99,15 +100,11 @@
 				.append('path')
 				.datum(this.features)
 				.attr('fill', this.background)
-				.attr('stroke', this.background)
-				.attr('stroke-width', 1)
 				.attr('d', this.path);
 
 			this.voronoiNode = this.svg
 				.append('g')
 				.attr('fill', this.background)
-				.attr('stroke', this.background)
-				.attr('stroke-width', 0.5)
 				.attr('clip-path', 'url(#clip-mask)');
 
 			/*
@@ -142,8 +139,12 @@
 						type: 'FeatureCollection',
 						features: this.points
 					})
-					.attr('d', this.path.pointRadius(this.pointSize))
-					.attr('fill', this.pointColor);
+					.attr(
+						'd',
+						this.path.pointRadius((this.pointSize * 4) / this.N)
+					)
+					.attr('fill', this.pointColor)
+					.attr('clip-path', 'url(#clip-mask)');
 			},
 			drawVoronoi() {
 				if (this.voronoiSubNode) this.voronoiSubNode.remove();
@@ -154,7 +155,6 @@
 					.enter()
 					.append('path')
 					.attr('d', this.path)
-					.attr('stroke', this.background)
 					.attr('pointer-events', 'all')
 					.attr('fill', (p) => {
 						const g =

@@ -12,28 +12,6 @@
 						'40%' // 992px upwards
 					]"
 				>
-					<c-button-group>
-						<c-button
-							variant-color="green"
-							@click="
-								{
-									if (pendingData.length > 0)
-										nodeData.push(pendingData.pop());
-								}
-							"
-							>Add</c-button
-						>
-						<c-button
-							variant-color="red"
-							@click="
-								{
-									if (nodeData.length > 0)
-										pendingData.push(nodeData.pop());
-								}
-							"
-							>Remove</c-button
-						>
-					</c-button-group>
 					<c-stat-group>
 						<Stat
 							gas="CO2"
@@ -74,6 +52,7 @@
 	import Navbar from '@/components/Navbar';
 	import Map from '@/components/Map';
 	import Stat from '@/components/Stat';
+	import axios from 'axios';
 
 	export default {
 		name: 'App',
@@ -87,45 +66,22 @@
 			}
 		}),
 		mounted() {
-			this.pendingData = [
-				{
-					gas: this.genGases(),
-					coordinates: [-4.45021390914917, 36.71963561245719]
-				},
-				{
-					gas: this.genGases(),
-					coordinates: [-4.431438446044922, 36.73240113505636]
-				},
-				{
-					gas: this.genGases(),
-					coordinates: [-4.478076696395874, 36.715215125584294]
-				},
-				{
-					gas: this.genGases(),
-					coordinates: [-4.490876197814941, 36.67908918792989]
-				},
-				{
-					gas: this.genGases(),
-					coordinates: [-4.486284255981445, 36.74129146113483]
-				},
-				{
-					gas: this.genGases(),
-					coordinates: [-4.415860176086426, 36.749613386425054]
-				}
-			];
+			setInterval(
+				async function() {
+					let { data } = await axios.get(
+						'http://192.168.1.137:3000',
+						{
+							'Access-Control-Allow-Origin': '*'
+						}
+					);
+					data = Object.keys(data).map((k) => data[k]);
+					console.table(data);
+					this.nodeData = data;
+				}.bind(this),
+				2500
+			);
 		},
 		methods: {
-			genGases() {
-				return {
-					co2: this.genGas(200, 2000),
-					o3: this.genGas(30, 70),
-					no2: this.genGas(20, 110),
-					so2: this.genGas(30, 220)
-				};
-			},
-			genGas(low, high) {
-				return Math.round(Math.random() * high + low);
-			},
 			avgGas(gas) {
 				return Math.round(
 					this.nodeData.reduce((p, c) => p + c.gas[gas], 0) /
