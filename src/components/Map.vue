@@ -29,8 +29,7 @@
 			width: 1920,
 			height: 600,
 			background: '#222',
-			pointSize: 2,
-			pointColor: 'Black',
+			pointSize: 5,
 			selectedGas: 'co2'
 			// muniFilter: [], [2, 3, 5, 8, 9, 10],
 		}),
@@ -141,9 +140,11 @@
 					})
 					.attr(
 						'd',
-						this.path.pointRadius((this.pointSize * 10) / this.N)
+						this.path.pointRadius(
+							this.pointSize / Math.sqrt(this.N + 1)
+						)
 					)
-					.attr('fill', this.pointColor)
+					.attr('fill', this.background)
 					.attr('clip-path', 'url(#clip-mask)');
 			},
 			drawVoronoi() {

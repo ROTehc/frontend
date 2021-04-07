@@ -7,9 +7,9 @@
 				<c-box
 					:width="[
 						'100%', // base
-						'50%', // 480px upwards
+						'80%', // 480px upwards
 						'70%', // 768px upwards
-						'40%' // 992px upwards
+						'50%' // 992px upwards
 					]"
 				>
 					<c-stat-group>
@@ -35,9 +35,9 @@
 	import Stat from '@/components/Stat';
 	import axios from 'axios';
 
-	const API_IP = 'http://localhost';
+	const API_IP = '192.168.1.137';
 	const API_PORT = 3000;
-	const URL = `${API_IP}:${API_PORT}/getData`;
+	const URL = `http://${API_IP}:${API_PORT}/getData`;
 
 	export default {
 		name: 'App',
@@ -76,13 +76,17 @@
 		},
 		mounted() {
 			this.getAll();
-			setInterval(this.getAll.bind(this), 10000);
+			setInterval(this.getAll.bind(this), 15000);
 		},
 		methods: {
 			async getAll() {
 				let { data } = await axios.get(URL, {
-					Accept: 'application/json'
+					headers: {
+						Accept: 'application/json'
+					}
 				});
+				console.log('get');
+				console.log(data);
 				this.nodeData = data;
 			},
 			avgGas(gas) {
