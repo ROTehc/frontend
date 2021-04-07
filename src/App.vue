@@ -35,10 +35,9 @@
 	import Stat from '@/components/Stat';
 	import axios from 'axios';
 
-	const CSE_IP = 'http://localhost';
-	const CSE_PORT = 3000;
-	const URL = `${CSE_IP}:${CSE_PORT}`;
-	// /cse-in?rcn=4;
+	const CSE_IP = 'http://85.136.88.194';
+	const CSE_PORT = 6969;
+	const URL = `${CSE_IP}:${CSE_PORT}/cse-in`;
 
 	export default {
 		name: 'App',
@@ -77,17 +76,20 @@
 		},
 		mounted() {
 			this.getAll();
-			setInterval(this.getAll.bind(this), 1000);
+			setInterval(this.getAll.bind(this), 10000);
 		},
 		methods: {
 			async getAll() {
-				let { data } = await axios.get(URL, {
+				let reqUrl = `${URL}?rcn=6&ty=2`;
+				console.log(reqUrl);
+				let aes = await axios.get(reqUrl, {
 					'X-M2M-Origin': 'CAdmin',
 					'X-M2M-RVI': 3,
 					'X-M2M-RI': 123456,
 					Accept: 'application/json'
 				});
-				this.nodeData = this.parse(data);
+				console.log(aes);
+				this.nodeData = this.parse(aes);
 			},
 			parse(res) {
 				const data = res['m2m:cb']['m2m:ae'];
