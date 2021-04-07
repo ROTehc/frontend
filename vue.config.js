@@ -8,9 +8,6 @@ module.exports = {
 		});
 	},
 	configureWebpack: {
-		plugins: [new ChakraLoaderPlugin()],
-		devServer: {
-			headers: { 'Access-Control-Allow-Origin': '*' }
-		}
+		plugins: [new ChakraLoaderPlugin()]
 	}
 };
