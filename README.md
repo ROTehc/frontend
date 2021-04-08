@@ -1,6 +1,11 @@
-# frontend
+# ROTehc Frontend
 
-## Project setup
+[![Generic badge](https://img.shields.io/badge/Vue-3CAA79.svg)](https://shields.io/)
+
+This frontend was built using [VueJS](https://vuejs.org/) and [Chakra-UI for VueJS](https://vue.chakra-ui.com/) for the ONEM2M 2021 Hackaton.
+
+## Setup
+### Project setup
 ```
 npm install
 ```
@@ -19,6 +24,3 @@ npm run build
 ```
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
