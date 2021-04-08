@@ -2,9 +2,9 @@
 	<c-stat
 		shadow="lg"
 		rounded="lg"
-		border-width="1px"
+		:border-width="$store.getters.colorMode == 'light' ? '' : '2px'"
 		:borderColor="color"
-		bg="#fff"
+		:bg="$theme[$store.getters.colorMode].mapBg"
 		p="2"
 		m="2"
 	>

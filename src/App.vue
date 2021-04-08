@@ -5,26 +5,23 @@
 			w="100vw"
 			h="100vh"
 			flex-dir="column"
-			v-bind="$theme[colorMode]"
+			v-bind="$theme[$store.getters.colorMode]"
 		>
-			<Navbar :colorMode="colorMode">
+			<Navbar :colorMode="$store.getters.colorMode">
 				<c-button
-					@click="$toggleColorMode"
-					:bg="$theme[colorMode].bg"
+					@click="changeColor"
+					:bg="$theme[$store.getters.colorMode].mapBg"
 					shadow="lg"
 					size="lg"
 					rounded="lg"
 					mr="4"
 				>
-					{{ colorMode == 'light' ? '🌚' : '🌝' }}
+					{{ $store.getters.colorMode == 'light' ? '🌚' : '🌞' }}
 				</c-button>
 			</Navbar>
 			<c-flex justify="center" direction="column" align="center">
-				<Map
-					:nodeData="nodeData"
-					:gases="thresholds"
-					:colorMode="colorMode"
-				/>
+				<Map :nodeData="nodeData" :gases="thresholds" />
+				<c-divider />
 				<c-box
 					:width="[
 						'100%', // base
@@ -73,14 +70,14 @@
 					thresholds: { ok: 1000, hi: 2000 }
 				},
 				{
-					name: 'no2',
-					unit: 'ppb',
-					thresholds: { ok: 55, hi: 61 }
-				},
-				{
 					name: 'o3',
 					unit: 'ppb',
 					thresholds: { ok: 50, hi: 100 }
+				},
+				{
+					name: 'no2',
+					unit: 'ppb',
+					thresholds: { ok: 55, hi: 61 }
 				},
 				{
 					name: 'so2',
@@ -95,16 +92,19 @@
 					obj[g.name] = g.thresholds;
 					return obj;
 				}, {});
-			},
-			colorMode() {
-				return this.$chakraColorMode();
 			}
 		},
 		mounted() {
 			this.getAll();
-			setInterval(this.getAll.bind(this), 15000);
+			setInterval(this.getAll.bind(this), 10000);
 		},
 		methods: {
+			changeColor() {
+				console.log('From', this.$store.getters.colorMode);
+				this.$toggleColorMode();
+				this.$store.commit('changeColor', this.$chakraColorMode());
+				console.log('To', this.$store.getters.colorMode);
+			},
 			async getAll() {
 				let { data } = await axios.get(URL, {
 					headers: {

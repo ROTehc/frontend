@@ -3,8 +3,8 @@
 		w="100%"
 		mb="4"
 		p="4"
-		shadow="lg"
-		:bg="this.$theme[this.colorMode].mapBg"
+		shadow="md"
+		:bg="$theme[$store.getters.colorMode].mapBg"
 	>
 		<c-radio-group v-model="selectedGas" is-inline variant-color="primary">
 			<c-radio value="co2">CO2</c-radio>
@@ -53,15 +53,14 @@
 		},
 		props: {
 			nodeData: Array,
-			gases: Object,
-			colorMode: String
+			gases: Object
 		},
 		computed: {
 			N() {
 				return this.nodeData.length;
 			},
 			background() {
-				return this.$theme[this.colorMode].color;
+				return this.$theme[this.$store.getters.colorMode].color;
 			},
 			bayWatch() {
 				return this.nodeData, this.selectedGas, Date.now();
@@ -167,7 +166,7 @@
 						'd',
 						this.path.pointRadius(pointSize / Math.sqrt(this.N + 1))
 					)
-					.attr('fill', this.$theme.dark.bg)
+					.attr('fill', this.$theme.dark.mapBg)
 					.attr('clip-path', 'url(#clip-mask)');
 			},
 			drawVoronoi() {

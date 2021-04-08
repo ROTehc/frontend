@@ -7,22 +7,23 @@ import Chakra, {
 	CReset
 } from '@chakra-ui/vue';
 import customTheme from './theme.js';
+import store from './store';
 
 Vue.prototype.$theme = {
 	dark: {
-		bg: customTheme.colors.mono[900],
-		mapBg: customTheme.colors.mono[800],
-		color: customTheme.colors.mono[200]
+		bg: customTheme.colors.mono[600],
+		mapBg: customTheme.colors.mono[900],
+		color: customTheme.colors.mono[50]
 	},
 	light: {
-		bg: customTheme.colors.mono[100],
+		bg: customTheme.colors.mono[200],
 		mapBg: customTheme.colors.mono[50],
-		color: customTheme.colors.mono[700]
+		color: customTheme.colors.mono[800]
 	},
 	gas: {
-		lo: '#2ed573',
-		ok: '#ffa502',
-		hi: '#ff4757'
+		lo: '#8bac6d',
+		ok: '#dca73e',
+		hi: '#BF616A'
 	}
 };
 
@@ -35,6 +36,7 @@ Vue.use(Chakra, {
 Vue.config.productionTip = false;
 
 new Vue({
+	store,
 	render: (h) =>
 		h(CThemeProvider, [
 			h(CColorModeProvider, [h(CBox, [h(CReset), h(App)])])
