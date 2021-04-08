@@ -1,9 +1,30 @@
 <template>
 	<div class="container">
-		<c-box d="flex" w="100vw" h="100vh" flex-dir="column">
-			<Navbar />
+		<c-box
+			d="flex"
+			w="100vw"
+			h="100vh"
+			flex-dir="column"
+			v-bind="$theme[colorMode]"
+		>
+			<Navbar :colorMode="colorMode">
+				<c-button
+					@click="$toggleColorMode"
+					:bg="$theme[colorMode].bg"
+					shadow="lg"
+					size="lg"
+					rounded="lg"
+					mr="4"
+				>
+					{{ colorMode == 'light' ? '🌚' : '🌝' }}
+				</c-button>
+			</Navbar>
 			<c-flex justify="center" direction="column" align="center">
-				<Map :nodeData="nodeData" :gases="thresholds" />
+				<Map
+					:nodeData="nodeData"
+					:gases="thresholds"
+					:colorMode="colorMode"
+				/>
 				<c-box
 					:width="[
 						'100%', // base
@@ -41,6 +62,8 @@
 
 	export default {
 		name: 'App',
+		inject: ['$chakraColorMode', '$toggleColorMode'],
+
 		data: () => ({
 			nodeData: [],
 			gases: [
@@ -72,6 +95,9 @@
 					obj[g.name] = g.thresholds;
 					return obj;
 				}, {});
+			},
+			colorMode() {
+				return this.$chakraColorMode();
 			}
 		},
 		mounted() {
@@ -85,8 +111,6 @@
 						Accept: 'application/json'
 					}
 				});
-				console.log('get');
-				console.log(data);
 				this.nodeData = data;
 			},
 			avgGas(gas) {

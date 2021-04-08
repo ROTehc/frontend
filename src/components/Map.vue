@@ -1,6 +1,12 @@
 <template>
-	<c-box w="100%" mb="4" p="4" shadow="sm">
-		<c-radio-group v-model="selectedGas" is-inline>
+	<c-box
+		w="100%"
+		mb="4"
+		p="4"
+		shadow="lg"
+		:bg="this.$theme[this.colorMode].mapBg"
+	>
+		<c-radio-group v-model="selectedGas" is-inline variant-color="primary">
 			<c-radio value="co2">CO2</c-radio>
 			<c-radio value="o3">O3</c-radio>
 			<c-radio value="no2">NO2</c-radio>
@@ -23,13 +29,13 @@
 	import * as topojson from 'topojson';
 	import map from '../mapred.json';
 
+	const width = 1920;
+	const height = 600;
+	const pointSize = 5;
+
 	export default {
 		name: 'Map',
 		data: () => ({
-			width: 1920,
-			height: 600,
-			background: '#222',
-			pointSize: 5,
 			selectedGas: 'co2'
 			// muniFilter: [], [2, 3, 5, 8, 9, 10],
 		}),
@@ -37,15 +43,25 @@
 			bayWatch: function() {
 				this.drawVoronoi();
 				this.drawPoints();
+			},
+			background: function() {
+				this.drawMap();
+				this.createVoronoiNode();
+				this.drawVoronoi();
+				this.drawPoints();
 			}
 		},
 		props: {
 			nodeData: Array,
-			gases: Object
+			gases: Object,
+			colorMode: String
 		},
 		computed: {
 			N() {
 				return this.nodeData.length;
+			},
+			background() {
+				return this.$theme[this.colorMode].color;
 			},
 			bayWatch() {
 				return this.nodeData, this.selectedGas, Date.now();
@@ -74,7 +90,7 @@
 
 			this.svg = select('#map')
 				.append('svg')
-				.attr('viewBox', [0, 0, this.width, this.height])
+				.attr('viewBox', [0, 0, width, height])
 				.attr('preserveAspectRatio', 'xMinYMin meet')
 				.classed('svg-content', true);
 
@@ -84,7 +100,7 @@
 				.attr('id', 'clip-mask');
 
 			this.projection = geoAzimuthalEquidistant().fitSize(
-				[this.width, this.height],
+				[width, height],
 				this.features
 			);
 
@@ -95,16 +111,9 @@
 				.datum(this.features)
 				.attr('d', this.path);
 
-			this.svg
-				.append('path')
-				.datum(this.features)
-				.attr('fill', this.background)
-				.attr('d', this.path);
+			this.drawMap();
 
-			this.voronoiNode = this.svg
-				.append('g')
-				.attr('fill', this.background)
-				.attr('clip-path', 'url(#clip-mask)');
+			this.createVoronoiNode();
 
 			/*
 	    this.svg
@@ -118,6 +127,22 @@
 	      */
 		},
 		methods: {
+			drawMap() {
+				if (this.mapPath) {
+					this.mapPath.remove();
+				}
+				this.mapPath = this.svg
+					.append('path')
+					.datum(this.features)
+					.attr('fill', this.background)
+					.attr('d', this.path);
+			},
+			createVoronoiNode() {
+				this.voronoiNode = this.svg
+					.append('g')
+					.attr('fill', this.background)
+					.attr('clip-path', 'url(#clip-mask)');
+			},
 			pointBuilder({ gas, coordinates }) {
 				return {
 					type: 'Feature',
@@ -140,11 +165,9 @@
 					})
 					.attr(
 						'd',
-						this.path.pointRadius(
-							this.pointSize / Math.sqrt(this.N + 1)
-						)
+						this.path.pointRadius(pointSize / Math.sqrt(this.N + 1))
 					)
-					.attr('fill', this.background)
+					.attr('fill', this.$theme.dark.bg)
 					.attr('clip-path', 'url(#clip-mask)');
 			},
 			drawVoronoi() {
@@ -160,9 +183,9 @@
 					.attr('fill', (p) => {
 						const g =
 							p.properties.site.properties.gas[this.selectedGas];
-						if (g < this.ok) return 'forestgreen';
-						else if (g < this.hi) return 'Gold';
-						else return 'FireBrick';
+						if (g < this.ok) return this.$theme.gas.lo;
+						else if (g < this.hi) return this.$theme.gas.ok;
+						else return this.$theme.gas.hi;
 					});
 
 				this.voronoiSubNode.append('title').text((node) => {

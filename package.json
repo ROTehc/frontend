@@ -9,6 +9,11 @@
 	},
 	"dependencies": {
 		"@chakra-ui/vue": "^0.6.2",
+		"@fontsource/fira-code": "^4.2.2",
+		"@fontsource/major-mono-display": "^4.2.3",
+		"@fontsource/nunito": "^4.2.2",
+		"@fontsource/raleway": "^4.2.2",
+		"@fontsource/roboto": "^4.2.2",
 		"axios": "^0.21.1",
 		"core-js": "^3.6.5",
 		"d3": "^6.6.2",
