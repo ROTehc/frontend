@@ -150,7 +150,7 @@
 					},
 					geometry: {
 						type: 'Point',
-						coordinates: coordinates.map((c) => c.toFixed(6))
+						coordinates: [coordinates.lon, coordinates.lat]
 					}
 				};
 			},

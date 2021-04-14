@@ -53,9 +53,9 @@
 	import Stat from '@/components/Stat';
 	import axios from 'axios';
 
-	const API_IP = '192.168.1.137';
-	const API_PORT = 3000;
-	const URL = `http://${API_IP}:${API_PORT}/getData`;
+	const APP_ADDR = '192.168.1.128';
+	const APP_PORT = 3000;
+	const URL = `http://${APP_ADDR}:${APP_PORT}/getData`;
 
 	export default {
 		name: 'App',
